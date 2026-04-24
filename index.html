@@ -431,6 +431,145 @@
   </div>
 </div>
 
+<!-- ========== AGENT SKILLS ========== -->
+<div id="skills" class="section">
+  <div class="section-title">
+    <div class="section-icon" style="background:rgba(139,92,246,0.1)">🧩</div>
+    <div><h2>MongoDB Agent Skills</h2><p>Pre-built capabilities that supercharge your AI coding assistant when working with MongoDB.</p></div>
+  </div>
+
+  <p class="body-txt">Agent Skills are specialised prompt-driven modules available inside Claude Code and other AI assistants that understand MongoDB deeply. When the MongoDB MCP server is connected, these skills activate automatically to help you query, design, optimise, and build with MongoDB using natural language.</p>
+
+  <h3 class="sub">Available Skills</h3>
+  <div class="cards">
+    <div class="card"><div class="card-accent" style="background:var(--green)"></div>
+      <h3>💬 Natural Language Querying</h3>
+      <p>Describe what you want in plain English and get a working <code>find()</code> or aggregation pipeline. Understands your collection schema and generates read-only queries with sample output.</p></div>
+    <div class="card"><div class="card-accent" style="background:var(--teal)"></div>
+      <h3>📐 Schema Design</h3>
+      <p>Get guidance on embedding vs referencing, one-to-many patterns, polymorphic schemas, unbounded arrays, tree structures, and the 16MB document limit. Migrate from SQL with confidence.</p></div>
+    <div class="card"><div class="card-accent" style="background:var(--purple)"></div>
+      <h3>⚡ Query Optimiser</h3>
+      <p>Analyse slow queries, get index recommendations, understand <code>explain()</code> output, and identify collection scan bottlenecks. Prioritises indexing as the primary optimisation strategy.</p></div>
+    <div class="card"><div class="card-accent" style="background:var(--orange)"></div>
+      <h3>🔍 Search &amp; AI</h3>
+      <p>Build Atlas Search (full-text), Vector Search (semantic/RAG), and Hybrid Search solutions. Covers autocomplete, fuzzy matching, faceted search, and embedding-based similarity.</p></div>
+    <div class="card"><div class="card-accent" style="background:var(--green)"></div>
+      <h3>🔌 Connection Optimiser</h3>
+      <p>Configure connection pools, timeouts, and patterns for any driver language. Troubleshoot ECONNREFUSED, pool exhaustion, and serverless cold starts.</p></div>
+    <div class="card"><div class="card-accent" style="background:var(--teal)"></div>
+      <h3>🌊 Atlas Stream Processing</h3>
+      <p>Manage streaming workloads with Atlas Stream Processing — workspace provisioning, Kafka/S3/Lambda integrations, processor lifecycle, and tier sizing.</p></div>
+  </div>
+
+  <div class="divider"></div>
+
+  <h3 class="sub">How to Use Agent Skills</h3>
+  <ul class="steps" style="counter-reset:step">
+    <li><strong>Connect the MongoDB MCP Server</strong><span>Skills activate automatically when the MCP server is connected to your AI assistant (Claude Code, Cursor, VS Code). No extra setup needed.</span></li>
+    <li><strong>Ask in natural language</strong><span>Just describe what you need: <em>"Design a schema for an e-commerce cart"</em>, <em>"Why is this query slow?"</em>, or <em>"Write a query to find users who signed up last week"</em>.</span></li>
+    <li><strong>Skills are invoked automatically</strong><span>The AI assistant detects the intent and activates the right skill — schema design for modelling questions, query optimiser for performance issues, search skill for full-text or vector queries.</span></li>
+    <li><strong>Iterate and refine</strong><span>Skills have full context of your cluster — collections, schemas, indexes, and sample documents. Ask follow-up questions to refine the output until it's exactly right.</span></li>
+  </ul>
+
+  <div class="divider"></div>
+
+  <h3 class="sub">Example Prompts by Skill</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Natural Language Querying</span></div>
+    <div class="code-body">
+<span class="cm"># Simple query</span>
+<span class="cp">"Find all orders from Australia with amount greater than $500"</span>
+
+<span class="cm"># Aggregation pipeline</span>
+<span class="cp">"Group transactions by merchant country and show total spend per country, sorted highest first"</span>
+
+<span class="cm"># Complex joins</span>
+<span class="cp">"Show me users who have placed more than 3 orders in the last 30 days with their order details"</span>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Schema Design</span></div>
+    <div class="code-body">
+<span class="cm"># Data modelling</span>
+<span class="cp">"Design a schema for a social media app with users, posts, and comments"</span>
+
+<span class="cm"># Pattern selection</span>
+<span class="cp">"Should I embed or reference reviews inside my products collection?"</span>
+
+<span class="cm"># SQL migration</span>
+<span class="cp">"I have these SQL tables — users, orders, order_items. How should I model this in MongoDB?"</span>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Query Optimisation &amp; Search</span></div>
+    <div class="code-body">
+<span class="cm"># Performance</span>
+<span class="cp">"This aggregation on the transactions collection is slow — how do I optimise it?"</span>
+
+<span class="cm"># Index recommendations</span>
+<span class="cp">"What indexes should I create for queries that filter by status, date range, and user_id?"</span>
+
+<span class="cm"># Atlas Search</span>
+<span class="cp">"Set up autocomplete search on the products collection for the name and description fields"</span>
+
+<span class="cm"># Vector Search (RAG)</span>
+<span class="cp">"Create a vector search index on my documents collection for semantic similarity using embeddings"</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <h3 class="sub">Useful Links</h3>
+  <div class="tool-row">
+    <div><div class="tool-name">MongoDB MCP Server</div></div>
+    <div class="tool-desc">Official MongoDB MCP server — connects AI assistants to your Atlas cluster</div>
+    <span class="tag tg"><a href="https://github.com/mongodb-js/mongodb-mcp-server" target="_blank" style="color:var(--green);text-decoration:none">GitHub Repo</a></span>
+  </div>
+  <div class="tool-row">
+    <div><div class="tool-name">MCP Server Docs</div></div>
+    <div class="tool-desc">Official documentation for setting up and configuring the MongoDB MCP server</div>
+    <span class="tag tg"><a href="https://www.mongodb.com/docs/mongodb-mcp-server/" target="_blank" style="color:var(--green);text-decoration:none">Docs</a></span>
+  </div>
+  <div class="tool-row">
+    <div><div class="tool-name">Schema Design Patterns</div></div>
+    <div class="tool-desc">Building with Patterns — the official MongoDB blog series on schema design patterns</div>
+    <span class="tag tt"><a href="https://www.mongodb.com/blog/post/building-with-patterns-a-summary" target="_blank" style="color:var(--teal);text-decoration:none">Blog Series</a></span>
+  </div>
+  <div class="tool-row">
+    <div><div class="tool-name">Atlas Search Docs</div></div>
+    <div class="tool-desc">Full-text search, autocomplete, faceted search, and fuzzy matching with Atlas Search</div>
+    <span class="tag tt"><a href="https://www.mongodb.com/docs/atlas/atlas-search/" target="_blank" style="color:var(--teal);text-decoration:none">Docs</a></span>
+  </div>
+  <div class="tool-row">
+    <div><div class="tool-name">Atlas Vector Search</div></div>
+    <div class="tool-desc">Semantic search, RAG applications, and embedding-based similarity queries</div>
+    <span class="tag tp"><a href="https://www.mongodb.com/docs/atlas/atlas-vector-search/vector-search-overview/" target="_blank" style="color:var(--purple);text-decoration:none">Docs</a></span>
+  </div>
+  <div class="tool-row">
+    <div><div class="tool-name">Aggregation Reference</div></div>
+    <div class="tool-desc">Complete reference for all aggregation pipeline stages and operators</div>
+    <span class="tag tp"><a href="https://www.mongodb.com/docs/manual/reference/operator/aggregation-pipeline/" target="_blank" style="color:var(--purple);text-decoration:none">Reference</a></span>
+  </div>
+  <div class="tool-row">
+    <div><div class="tool-name">Stream Processing</div></div>
+    <div class="tool-desc">Atlas Stream Processing for real-time event-driven data workloads</div>
+    <span class="tag to"><a href="https://www.mongodb.com/docs/atlas/atlas-stream-processing/overview/" target="_blank" style="color:var(--orange);text-decoration:none">Docs</a></span>
+  </div>
+
+  <div class="info-box tip">
+    <span class="icon">💡</span>
+    <p><strong>Pro tip:</strong> Combine skills for maximum speed — ask the schema design skill to model your data, then immediately ask the natural language skill to generate seed data and queries. Follow up with the query optimiser to add indexes. Full data layer in minutes.</p>
+  </div>
+
+  <div class="info-box info">
+    <span class="icon">🔗</span>
+    <p><strong>Claude Code users:</strong> Install the MongoDB MCP server as a plugin with <code>claude plugins install @anthropic-ai/claude-code-mongodb</code> or configure it in your <code>.claude/settings.json</code>. All agent skills become available as slash commands automatically.</p>
+  </div>
+</div>
+
 <!-- ========== TIPS ========== -->
 <div id="tips" class="section">
   <div class="section-title">
