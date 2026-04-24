@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MongoDB Atlas — Hackathon Dev Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap');
+  :root {
+    --green: #00ED64; --dark: #001E2B; --mid: #023430; --card: #0A2535;
+    --muted: #5C7A8A; --text: #C8DDE8; --white: #E8F5FF;
+    --orange: #FF6B35; --purple: #8B5CF6; --teal: #00BCD4;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Syne',sans-serif; background:var(--dark); color:var(--text); line-height:1.6; }
+  .hero {
+    background: linear-gradient(135deg,#001E2B 0%,#023430 50%,#001E2B 100%);
+    padding: 48px 40px 36px; border-bottom:1px solid rgba(0,237,100,0.15); position:relative; overflow:hidden;
+  }
+  .hero::before { content:''; position:absolute; top:-60px; right:-60px; width:300px; height:300px;
+    background:radial-gradient(circle,rgba(0,237,100,0.08) 0%,transparent 70%); border-radius:50%; }
+  .badge {
+    display:inline-flex; align-items:center; gap:8px;
+    background:rgba(0,237,100,0.1); border:1px solid rgba(0,237,100,0.3);
+    color:var(--green); font-family:'Space Mono',monospace; font-size:11px;
+    padding:6px 14px; border-radius:2px; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:20px;
+  }
+  .badge-dot { width:6px; height:6px; background:var(--green); border-radius:50%; animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+  .hero h1 { font-size:clamp(28px,4vw,42px); font-weight:800; color:var(--white); line-height:1.1; margin-bottom:12px; }
+  .hero h1 span { color:var(--green); }
+  .hero p { font-size:15px; color:var(--muted); max-width:620px; }
+  .tabs {
+    display:flex; padding:0 40px; background:#0A2535;
+    border-bottom:1px solid rgba(255,255,255,0.06); overflow-x:auto;
+  }
+  .tab {
+    padding:14px 22px; font-family:'Space Mono',monospace; font-size:11px;
+    color:var(--muted); cursor:pointer; border-bottom:2px solid transparent;
+    transition:all 0.2s; white-space:nowrap; letter-spacing:0.05em; text-transform:uppercase;
+  }
+  .tab:hover { color:var(--text); }
+  .tab.active { color:var(--green); border-bottom-color:var(--green); }
+  .content { padding:36px 40px; max-width:960px; margin:0 auto; }
+  .section { display:none; }
+  .section.active { display:block; }
+  .section-title { display:flex; align-items:center; gap:14px; margin-bottom:28px; }
+  .section-icon { width:44px; height:44px; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+  .section-title h2 { font-size:22px; font-weight:700; color:var(--white); }
+  .section-title p { font-size:13px; color:var(--muted); margin-top:2px; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; margin-bottom:28px; }
+  .card {
+    background:var(--card); border:1px solid rgba(255,255,255,0.06); border-radius:6px;
+    padding:22px; transition:border-color 0.2s,transform 0.2s; position:relative; overflow:hidden;
+  }
+  .card:hover { border-color:rgba(0,237,100,0.25); transform:translateY(-2px); }
+  .card-accent { position:absolute; top:0; left:0; right:0; height:2px; }
+  .card h3 { font-size:14px; font-weight:700; color:var(--white); margin-bottom:8px; }
+  .card p { font-size:13px; color:var(--muted); line-height:1.55; }
+  .code-block {
+    background:#050F14; border:1px solid rgba(255,255,255,0.08);
+    border-radius:6px; overflow:hidden; margin:16px 0; font-family:'Space Mono',monospace;
+  }
+  .code-header {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 16px; background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .code-lang { font-size:10px; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; }
+  .copy-btn {
+    font-family:'Space Mono',monospace; font-size:10px; color:var(--muted);
+    background:none; border:1px solid rgba(255,255,255,0.1); padding:3px 10px;
+    border-radius:2px; cursor:pointer; transition:all 0.2s;
+  }
+  .copy-btn:hover { color:var(--green); border-color:var(--green); }
+  .code-body { padding:16px; font-size:12px; line-height:1.8; overflow-x:auto; }
+  .cg{color:var(--green)} .co{color:var(--orange)} .ct{color:var(--teal)}
+  .cm{color:var(--muted)} .cp{color:var(--purple)} .cw{color:var(--white)}
+  .steps { list-style:none; counter-reset:step; margin:16px 0; }
+  .steps li {
+    counter-increment:step; display:flex; gap:16px; margin-bottom:16px;
+    padding:16px 18px; background:var(--card); border:1px solid rgba(255,255,255,0.05); border-radius:6px;
+  }
+  .steps li::before {
+    content:counter(step,decimal-leading-zero); font-family:'Space Mono',monospace;
+    font-size:11px; color:var(--green); font-weight:700; flex-shrink:0; padding-top:2px;
+  }
+  .steps li strong { color:var(--white); display:block; font-size:14px; margin-bottom:4px; }
+  .steps li span { font-size:13px; color:var(--muted); }
+  .tag { display:inline-block; padding:3px 10px; border-radius:2px; font-family:'Space Mono',monospace;
+    font-size:10px; letter-spacing:0.05em; text-transform:uppercase; margin:3px 3px 3px 0; }
+  .tg { background:rgba(0,237,100,0.1); color:var(--green); border:1px solid rgba(0,237,100,0.2); }
+  .to { background:rgba(255,107,53,0.1); color:var(--orange); border:1px solid rgba(255,107,53,0.2); }
+  .tp { background:rgba(139,92,246,0.1); color:var(--purple); border:1px solid rgba(139,92,246,0.2); }
+  .tt { background:rgba(0,188,212,0.1); color:var(--teal); border:1px solid rgba(0,188,212,0.2); }
+  .info-box { border-radius:6px; padding:16px 18px; margin:18px 0; font-size:13px; display:flex; gap:12px; align-items:flex-start; }
+  .info-box.tip  { background:rgba(0,237,100,0.06); border:1px solid rgba(0,237,100,0.2); }
+  .info-box.warn { background:rgba(255,107,53,0.06); border:1px solid rgba(255,107,53,0.2); }
+  .info-box.info { background:rgba(0,188,212,0.06); border:1px solid rgba(0,188,212,0.2); }
+  .info-box .icon { font-size:16px; flex-shrink:0; margin-top:1px; }
+  .info-box p { color:var(--text); line-height:1.55; }
+  .info-box strong { color:var(--white); }
+  .divider { height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent); margin:28px 0; }
+  .tool-row {
+    display:grid; grid-template-columns:140px 1fr auto; gap:16px; align-items:center;
+    padding:14px 18px; background:var(--card); border:1px solid rgba(255,255,255,0.05);
+    border-radius:4px; margin-bottom:8px; transition:border-color 0.2s;
+  }
+  .tool-row:hover { border-color:rgba(0,237,100,0.2); }
+  .tool-name { font-weight:700; font-size:13px; color:var(--white); }
+  .tool-desc { font-size:12px; color:var(--muted); }
+  .mcp-flow { display:flex; align-items:stretch; gap:0; margin:20px 0; overflow-x:auto; }
+  .mcp-node {
+    background:var(--card); border:1px solid rgba(255,255,255,0.08); border-radius:6px;
+    padding:16px 18px; min-width:120px; flex:1; text-align:center;
+  }
+  .mcp-node .label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; font-family:'Space Mono',monospace; margin-bottom:6px; }
+  .mcp-node .name { font-size:13px; font-weight:700; color:var(--white); }
+  .mcp-arrow { display:flex; align-items:center; padding:0 8px; color:var(--green); font-size:16px; flex-shrink:0; }
+  h3.sub { font-size:15px; color:var(--white); font-weight:700; margin:22px 0 10px; }
+  p.body-txt { font-size:13px; color:var(--muted); line-height:1.65; margin-bottom:12px; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge"><span class="badge-dot"></span>Hackathon Dev Guide · MongoDB Atlas</div>
+  <h1>Connect Fast.<br><span>Build Faster.</span></h1>
+  <p>Everything you need to go from zero to connected on MongoDB Atlas — Compass, mongosh, drivers, MCP, and AI agents. Ship in hours, not days.</p>
+</div>
+
+<div class="tabs">
+  <div class="tab active"  onclick="show('overview',this)">🗺 Overview</div>
+  <div class="tab"         onclick="show('compass',this)">🧭 Compass</div>
+  <div class="tab"         onclick="show('mongosh',this)">💻 mongosh</div>
+  <div class="tab"         onclick="show('drivers',this)">⚙️ Drivers</div>
+  <div class="tab"         onclick="show('mcp',this)">🤖 MCP &amp; Agents</div>
+  <div class="tab"         onclick="show('skills',this)">🧩 Agent Skills</div>
+  <div class="tab"         onclick="show('tips',this)">⚡ Quick Tips</div>
+</div>
+
+<div class="content">
+
+<!-- ========== OVERVIEW ========== -->
+<div id="overview" class="section active">
+  <div class="section-title">
+    <div class="section-icon" style="background:rgba(0,237,100,0.1)">🗺</div>
+    <div><h2>Atlas Connection Map</h2><p>Pick your tool, grab your connection string, start building.</p></div>
+  </div>
+  <div class="info-box tip">
+    <span class="icon">🔑</span>
+    <p><strong>First things first:</strong> Get your connection string from Atlas UI → Your Cluster → <em>Connect</em> button. You'll use it across every tool below. Store it in a <code>.env</code> file — never hardcode it.</p>
+  </div>
+  <div class="cards">
+    <div class="card"><div class="card-accent" style="background:linear-gradient(90deg,#00ED64,#00BCD4)"></div>
+      <h3>🧭 Compass</h3><p>Visual GUI for exploring data, building aggregations, and schema analysis. Zero code required.</p>
+      <br><span class="tag tg">GUI</span><span class="tag tt">No Code</span></div>
+    <div class="card"><div class="card-accent" style="background:linear-gradient(90deg,#00BCD4,#8B5CF6)"></div>
+      <h3>💻 mongosh</h3><p>Modern JS-based shell. Run queries, scripts, and admin commands straight from your terminal.</p>
+      <br><span class="tag tt">CLI</span><span class="tag tp">Scriptable</span></div>
+    <div class="card"><div class="card-accent" style="background:linear-gradient(90deg,#8B5CF6,#FF6B35)"></div>
+      <h3>⚙️ Drivers</h3><p>Official drivers for Node.js, Python, Java, Go and more. One import away in your app.</p>
+      <br><span class="tag tp">Code</span><span class="tag to">App</span></div>
+    <div class="card"><div class="card-accent" style="background:linear-gradient(90deg,#FF6B35,#00ED64)"></div>
+      <h3>🤖 MCP &amp; Agents</h3><p>Connect Claude, Cursor, or VS Code Copilot to your cluster. Natural language → real queries.</p>
+      <br><span class="tag to">AI</span><span class="tag tg">Agentic</span></div>
+  </div>
+  <div class="divider"></div>
+  <h3 class="sub">Your Connection String Template</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Connection String</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+    <div class="code-body">
+<span class="cm"># Standard SRV format</span>
+<span class="cg">mongodb+srv://</span><span class="co">&lt;username&gt;</span><span class="cw">:</span><span class="co">&lt;password&gt;</span><span class="cw">@</span><span class="ct">&lt;cluster&gt;.mongodb.net</span><span class="cw">/</span><span class="cp">&lt;dbname&gt;</span><span class="cw">?retryWrites=true&amp;w=majority</span>
+
+<span class="cm"># Example</span>
+<span class="cg">mongodb+srv://</span><span class="co">hackdev:p4ssw0rd</span><span class="cw">@</span><span class="ct">cluster0.abc12.mongodb.net</span><span class="cw">/</span><span class="cp">hackdb</span><span class="cw">?retryWrites=true&amp;w=majority</span>
+    </div>
+  </div>
+</div>
+
+<!-- ========== COMPASS ========== -->
+<div id="compass" class="section">
+  <div class="section-title">
+    <div class="section-icon" style="background:rgba(0,237,100,0.1)">🧭</div>
+    <div><h2>MongoDB Compass</h2><p>Visual GUI — explore, query &amp; aggregate without writing a line of code.</p></div>
+  </div>
+  <ul class="steps">
+    <li><strong>Download &amp; Install</strong><span>Get Compass from <code>mongodb.com/products/compass</code>. Available for macOS, Windows and Linux. Takes ~2 min.</span></li>
+    <li><strong>Paste your connection string</strong><span>Open Compass → New Connection → paste your <code>mongodb+srv://...</code> URI. Optionally name it and save it for next time.</span></li>
+    <li><strong>Explore your data</strong><span>Browse collections, view documents, inspect schema distribution, and spot index opportunities immediately.</span></li>
+    <li><strong>Use the Aggregation Builder</strong><span>Click the <em>Aggregations</em> tab → Add Stage → pick an operator (<code>$match</code>, <code>$group</code>, <code>$lookup</code> …). Preview output at every stage in real time.</span></li>
+    <li><strong>Export pipeline as code</strong><span>Click <em>Export to Language</em> in the builder to get Node.js / Python / Java / C# code instantly — no hand-writing aggregations.</span></li>
+  </ul>
+  <div class="info-box tip">
+    <span class="icon">💡</span>
+    <p><strong>Hackathon tip:</strong> Design your aggregation pipeline visually in Compass, then export it as driver code — this alone can save 30–60 minutes of trial-and-error.</p>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Compass Embedded Shell (mongosh)</span></div>
+    <div class="code-body">
+<span class="cm">// Compass has a built-in mongosh tab at the bottom of the screen</span>
+<span class="ct">db</span><span class="cw">.</span><span class="cg">users</span><span class="cw">.find({ </span><span class="co">status</span><span class="cw">: </span><span class="cp">"active"</span><span class="cw"> }).limit(</span><span class="co">10</span><span class="cw">)</span>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MONGOSH ========== -->
+<div id="mongosh" class="section">
+  <div class="section-title">
+    <div class="section-icon" style="background:rgba(0,188,212,0.1)">💻</div>
+    <div><h2>mongosh — MongoDB Shell</h2><p>The modern JS shell. Seed data, run admin ops, and script everything from your terminal.</p></div>
+  </div>
+  <ul class="steps">
+    <li><strong>Install mongosh</strong><span>macOS: <code>brew install mongosh</code> · npm: <code>npm i -g mongosh</code> · or download from <code>mongodb.com/try/download/shell</code></span></li>
+    <li><strong>Connect to Atlas</strong><span>Run the connect command below with your SRV connection string. Optionally embed credentials or enter password when prompted.</span></li>
+    <li><strong>Switch database &amp; query</strong><span>Type <code>use mydb</code> to switch context, then use full JavaScript — loops, variables, helper functions — alongside MongoDB commands.</span></li>
+    <li><strong>Run a seed script</strong><span>Pass a <code>.js</code> file directly: <code>mongosh "mongodb+srv://..." seed.js</code> — perfect for pre-loading demo data.</span></li>
+  </ul>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+    <div class="code-body">
+<span class="cm"># Connect</span>
+<span class="cg">mongosh</span> <span class="cw">"mongodb+srv://user:pass@cluster0.abc.mongodb.net/hackdb"</span>
+
+<span class="cm"># Switch db and CRUD</span>
+<span class="ct">use</span> <span class="co">hackdb</span>
+<span class="ct">db</span><span class="cw">.</span><span class="cg">users</span><span class="cw">.insertOne({ name: </span><span class="cp">"Alice"</span><span class="cw">, score: </span><span class="co">42</span><span class="cw"> })</span>
+<span class="ct">db</span><span class="cw">.</span><span class="cg">users</span><span class="cw">.find({ score: { </span><span class="co">$gte</span><span class="cw">: </span><span class="co">30</span><span class="cw"> } })</span>
+<span class="ct">db</span><span class="cw">.</span><span class="cg">users</span><span class="cw">.updateOne({ name: </span><span class="cp">"Alice"</span><span class="cw"> }, { $set: { score: </span><span class="co">99</span><span class="cw"> } })</span>
+<span class="ct">db</span><span class="cw">.</span><span class="cg">users</span><span class="cw">.deleteOne({ name: </span><span class="cp">"Alice"</span><span class="cw"> })</span>
+
+<span class="cm"># Seed data from a JS file</span>
+<span class="cg">mongosh</span> <span class="cw">"mongodb+srv://..." seed.js</span>
+    </div>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">seed.js — Seed Script Example</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+    <div class="code-body">
+<span class="ct">use</span><span class="cw">(</span><span class="cp">"hackdb"</span><span class="cw">);</span>
+<span class="ct">db</span><span class="cw">.</span><span class="cg">products</span><span class="cw">.insertMany([</span>
+  <span class="cw">{ name: </span><span class="cp">"Widget A"</span><span class="cw">, price: </span><span class="co">9.99</span><span class="cw">, stock: </span><span class="co">100</span><span class="cw"> },</span>
+  <span class="cw">{ name: </span><span class="cp">"Widget B"</span><span class="cw">, price: </span><span class="co">14.99</span><span class="cw">, stock: </span><span class="co">50</span><span class="cw"> },</span>
+<span class="cw">]);</span>
+<span class="cg">print</span><span class="cw">(</span><span class="cp">"✅ Seeded!"</span><span class="cw">);</span>
+    </div>
+  </div>
+</div>
+
+<!-- ========== DRIVERS ========== -->
+<div id="drivers" class="section">
+  <div class="section-title">
+    <div class="section-icon" style="background:rgba(139,92,246,0.1)">⚙️</div>
+    <div><h2>Official Drivers</h2><p>One import and a connection string — that's all it takes in any language.</p></div>
+  </div>
+  <div class="tool-row">
+    <div><div class="tool-name">Node.js</div><div style="margin-top:4px"><span class="tag tg">npm i mongodb</span></div></div>
+    <div class="tool-desc">Official MongoDB Node.js driver. Works with Express, Next.js, Fastify, etc. Consider Mongoose for ODM / schema validation.</div>
+    <span class="tag tg">Most Popular</span>
+  </div>
+  <div class="tool-row">
+    <div><div class="tool-name">Python</div><div style="margin-top:4px"><span class="tag tt">pip install pymongo</span></div></div>
+    <div class="tool-desc">PyMongo (sync) + Motor (async). Works with FastAPI, Flask, Django. Motor is ideal for async/await services.</div>
+    <span class="tag tt">Popular</span>
+  </div>
+  <div class="tool-row">
+    <div><div class="tool-name">Java</div><div style="margin-top:4px"><span class="tag to">Maven / Gradle</span></div></div>
+    <div class="tool-desc">mongodb-driver-sync or mongodb-driver-reactivestreams. Integrates directly with Spring Boot via Spring Data MongoDB.</div>
+    <span class="tag to">Enterprise</span>
+  </div>
+  <div class="tool-row">
+    <div><div class="tool-name">Go</div><div style="margin-top:4px"><span class="tag tp">go get mongo-driver</span></div></div>
+    <div class="tool-desc">go.mongodb.org/mongo-driver — official Go driver. Great for microservices and high-throughput REST APIs.</div>
+    <span class="tag tp">Fast</span>
+  </div>
+  <div class="divider"></div>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Node.js — Quick Start</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+    <div class="code-body">
+<span class="ct">import</span><span class="cw"> { MongoClient } </span><span class="ct">from</span><span class="cp"> "mongodb"</span><span class="cw">;</span>
+<span class="ct">import</span><span class="cw"> * as dotenv </span><span class="ct">from</span><span class="cp"> "dotenv"</span><span class="cw">;</span>
+<span class="cw">dotenv.config();</span>
+
+<span class="ct">const</span><span class="cw"> client = </span><span class="ct">new</span><span class="cw"> MongoClient(process.env.</span><span class="cg">MONGODB_URI</span><span class="cw">);</span>
+
+<span class="ct">async function</span><span class="cg"> main</span><span class="cw">() {</span>
+  <span class="ct">await</span><span class="cw"> client.connect();</span>
+  <span class="ct">const</span><span class="cw"> db  = client.db(</span><span class="cp">"hackdb"</span><span class="cw">);</span>
+  <span class="ct">const</span><span class="cw"> col = db.collection(</span><span class="cp">"users"</span><span class="cw">);</span>
+
+  <span class="cm">// Insert</span>
+  <span class="ct">await</span><span class="cw"> col.insertOne({ name: </span><span class="cp">"Alice"</span><span class="cw">, ts: </span><span class="ct">new</span><span class="cw"> Date() });</span>
+
+  <span class="cm">// Query</span>
+  <span class="ct">const</span><span class="cw"> docs = </span><span class="ct">await</span><span class="cw"> col.find({ name: </span><span class="cp">"Alice"</span><span class="cw"> }).toArray();</span>
+  <span class="cw">console.log(docs);</span>
+
+  <span class="cm">// Aggregation</span>
+  <span class="ct">const</span><span class="cw"> results = </span><span class="ct">await</span><span class="cw"> col.aggregate([</span>
+    <span class="cw">{ $group: { _id: </span><span class="cp">"$region"</span><span class="cw">, count: { $sum: </span><span class="co">1</span><span class="cw"> } } }</span>
+  <span class="cw">]).toArray();</span>
+<span class="cw">}</span>
+<span class="cg">main</span><span class="cw">().finally(() => client.close());</span>
+    </div>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Python (PyMongo) — Quick Start</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+    <div class="code-body">
+<span class="ct">from</span><span class="cw"> pymongo </span><span class="ct">import</span><span class="cw"> MongoClient</span>
+<span class="ct">from</span><span class="cw"> dotenv </span><span class="ct">import</span><span class="cw"> load_dotenv</span>
+<span class="ct">import</span><span class="cw"> os</span>
+<span class="cw">load_dotenv()</span>
+
+<span class="cw">client = MongoClient(os.environ[</span><span class="cp">"MONGODB_URI"</span><span class="cw">])</span>
+<span class="cw">db  = client[</span><span class="cp">"hackdb"</span><span class="cw">]</span>
+<span class="cw">col = db[</span><span class="cp">"users"</span><span class="cw">]</span>
+
+<span class="cm"># Insert</span>
+<span class="cw">col.insert_one({</span><span class="cp">"name"</span><span class="cw">: </span><span class="cp">"Alice"</span><span class="cw">, </span><span class="cp">"score"</span><span class="cw">: </span><span class="co">42</span><span class="cw">})</span>
+
+<span class="cm"># Query</span>
+<span class="ct">for</span><span class="cw"> doc </span><span class="ct">in</span><span class="cw"> col.find({</span><span class="cp">"score"</span><span class="cw">: {</span><span class="cp">"$gte"</span><span class="cw">: </span><span class="co">30</span><span class="cw">}}):</span>
+    <span class="cw">print(doc)</span>
+
+<span class="cm"># Update</span>
+<span class="cw">col.update_one({</span><span class="cp">"name"</span><span class="cw">: </span><span class="cp">"Alice"</span><span class="cw">}, {</span><span class="cp">"$set"</span><span class="cw">: {</span><span class="cp">"score"</span><span class="cw">: </span><span class="co">99</span><span class="cw">}})</span>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MCP & AGENTS ========== -->
+<div id="mcp" class="section">
+  <div class="section-title">
+    <div class="section-icon" style="background:rgba(255,107,53,0.1)">🤖</div>
+    <div><h2>MCP &amp; AI Agents</h2><p>Connect Claude, Cursor, VS Code Copilot directly to your Atlas cluster via the MongoDB MCP server.</p></div>
+  </div>
+
+  <p class="body-txt">MCP (Model Context Protocol) is an open standard that lets AI coding assistants talk directly to external tools and databases — including MongoDB Atlas. Set it up once and your AI assistant can explore schemas, generate queries, seed data, and suggest indexes using plain English.</p>
+
+  <div class="mcp-flow">
+    <div class="mcp-node"><div class="label">AI Client</div><div class="name">Claude / Cursor</div></div>
+    <div class="mcp-arrow">→</div>
+    <div class="mcp-node" style="border-color:rgba(0,237,100,0.35)"><div class="label">Protocol</div><div class="name" style="color:var(--green)">MCP Server</div></div>
+    <div class="mcp-arrow">→</div>
+    <div class="mcp-node"><div class="label">Auth</div><div class="name">Atlas API Key</div></div>
+    <div class="mcp-arrow">→</div>
+    <div class="mcp-node"><div class="label">Database</div><div class="name">Atlas Cluster</div></div>
+  </div>
+
+  <h3 class="sub">Step 1 — Get Atlas API Keys</h3>
+  <ul class="steps" style="counter-reset:step">
+    <li><strong>Create an API Key</strong><span>Atlas UI → Access Manager → API Keys → Create API Key. Assign <em>Project Read Write</em> role. Save the public + private keys.</span></li>
+    <li><strong>Whitelist your IP</strong><span>Under the key's Access List, add your current IP (or <code>0.0.0.0/0</code> for hackathon convenience). Never use <code>0.0.0.0/0</code> in production.</span></li>
+    <li><strong>Store in .env</strong><span>Add <code>MDB_ATLAS_PUBLIC_KEY</code>, <code>MDB_ATLAS_PRIVATE_KEY</code>, and <code>MDB_CONNECTION_STRING</code> to your <code>.env</code> file.</span></li>
+  </ul>
+
+  <h3 class="sub">Step 2 — Install the MongoDB MCP Server</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+    <div class="code-body">
+<span class="cm"># Use via npx (no global install needed — recommended for hackathons)</span>
+<span class="cg">npx</span><span class="cw"> -y @mongodb-js/mongodb-mcp-server</span>
+
+<span class="cm"># Or install globally</span>
+<span class="cg">npm</span><span class="cw"> install -g @mongodb-js/mongodb-mcp-server</span>
+    </div>
+  </div>
+
+  <h3 class="sub">Step 3 — Configure in Claude Desktop</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">~/.config/claude/claude_desktop_config.json  (macOS: ~/Library/Application Support/Claude/)</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+    <div class="code-body">
+<span class="cw">{</span>
+  <span class="cg">"mcpServers"</span><span class="cw">: {</span>
+    <span class="ct">"mongodb"</span><span class="cw">: {</span>
+      <span class="co">"command"</span><span class="cw">: </span><span class="cp">"npx"</span><span class="cw">,</span>
+      <span class="co">"args"</span><span class="cw">: [</span><span class="cp">"-y"</span><span class="cw">, </span><span class="cp">"@mongodb-js/mongodb-mcp-server"</span><span class="cw">],</span>
+      <span class="co">"env"</span><span class="cw">: {</span>
+        <span class="cg">"MDB_CONNECTION_STRING"</span><span class="cw">:  </span><span class="cp">"mongodb+srv://user:pass@cluster.mongodb.net/hackdb"</span><span class="cw">,</span>
+        <span class="cg">"MDB_ATLAS_PUBLIC_KEY"</span><span class="cw">:   </span><span class="cp">"&lt;your-public-key&gt;"</span><span class="cw">,</span>
+        <span class="cg">"MDB_ATLAS_PRIVATE_KEY"</span><span class="cw">:  </span><span class="cp">"&lt;your-private-key&gt;"</span>
+      <span class="cw">}</span>
+    <span class="cw">}</span>
+  <span class="cw">}</span>
+<span class="cw">}</span>
+    </div>
+  </div>
+
+  <h3 class="sub">Step 4 — Configure in Cursor / VS Code</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">.cursor/mcp.json  OR  .vscode/mcp.json (project-level)</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+    <div class="code-body">
+<span class="cw">{</span>
+  <span class="cg">"servers"</span><span class="cw">: {</span>
+    <span class="ct">"mongodb"</span><span class="cw">: {</span>
+      <span class="co">"type"</span><span class="cw">:    </span><span class="cp">"stdio"</span><span class="cw">,</span>
+      <span class="co">"command"</span><span class="cw">: </span><span class="cp">"npx"</span><span class="cw">,</span>
+      <span class="co">"args"</span><span class="cw">:   [</span><span class="cp">"-y"</span><span class="cw">, </span><span class="cp">"@mongodb-js/mongodb-mcp-server"</span><span class="cw">],</span>
+      <span class="co">"env"</span><span class="cw">: {</span>
+        <span class="cg">"MDB_CONNECTION_STRING"</span><span class="cw">: </span><span class="cp">"${env:MONGODB_URI}"</span>
+      <span class="cw">}</span>
+    <span class="cw">}</span>
+  <span class="cw">}</span>
+<span class="cw">}</span>
+    </div>
+  </div>
+
+  <h3 class="sub">What can your AI agent do once connected?</h3>
+  <div class="cards">
+    <div class="card"><div class="card-accent" style="background:var(--green)"></div>
+      <h3>🔍 Schema Discovery</h3>
+      <p>"What collections exist in my database? What fields does the orders collection have?"</p></div>
+    <div class="card"><div class="card-accent" style="background:var(--teal)"></div>
+      <h3>📊 Query Generation</h3>
+      <p>"Find all orders from the last 7 days with status = shipped, grouped by region."</p></div>
+    <div class="card"><div class="card-accent" style="background:var(--purple)"></div>
+      <h3>🛠 Index Suggestions</h3>
+      <p>"Which indexes should I add to speed up this query pattern across the users collection?"</p></div>
+    <div class="card"><div class="card-accent" style="background:var(--orange)"></div>
+      <h3>🌱 Data Seeding</h3>
+      <p>"Insert 50 realistic sample product documents into the products collection for me."</p></div>
+  </div>
+
+  <div class="info-box info">
+    <span class="icon">🧠</span>
+    <p><strong>Agent Skills (Claude Projects):</strong> In Claude.ai, you can create a <em>Project</em> with a custom system prompt that instructs the agent on your specific data model, naming conventions, and query patterns. Paste your schema or sample documents into the project context — the agent will use that knowledge for every conversation, eliminating repetitive explanations during the hackathon.</p>
+  </div>
+
+  <div class="info-box tip">
+    <span class="icon">🚀</span>
+    <p><strong>Fastest path to a working AI app:</strong> Atlas free cluster → MCP configured in Cursor → ask AI to generate data model + seed script + REST endpoints in one shot → connect driver → ship. Zero to deployed in under 45 minutes.</p>
+  </div>
+</div>
+
+<!-- ========== TIPS ========== -->
+<div id="tips" class="section">
+  <div class="section-title">
+    <div class="section-icon" style="background:rgba(255,107,53,0.1)">⚡</div>
+    <div><h2>Quick Tips &amp; Cheatsheet</h2><p>The stuff that saves hours in a hackathon.</p></div>
+  </div>
+  <div class="cards">
+    <div class="card"><div class="card-accent" style="background:var(--green)"></div>
+      <h3>🆓 Free M0 Tier</h3><p>Use Atlas M0 (free forever, no credit card). 512 MB storage, shared cluster. More than enough for hackathon workloads.</p></div>
+    <div class="card"><div class="card-accent" style="background:var(--teal)"></div>
+      <h3>🌐 Allow All IPs</h3><p>During hacking, set Network Access to <code>0.0.0.0/0</code> to avoid IP whitelist friction. Lock it down before going live.</p></div>
+    <div class="card"><div class="card-accent" style="background:var(--purple)"></div>
+      <h3>🔎 Atlas Search</h3><p>Enable full-text search in one click from the Atlas UI. No Elasticsearch needed — use <code>$search</code> in aggregation.</p></div>
+    <div class="card"><div class="card-accent" style="background:var(--orange)"></div>
+      <h3>📡 Change Streams</h3><p>Watch for real-time data changes with <code>collection.watch()</code>. Live dashboards and event-driven triggers made easy.</p></div>
+    <div class="card"><div class="card-accent" style="background:var(--green)"></div>
+      <h3>🗺 Atlas Charts</h3><p>Build embeddable dashboards on top of your data without writing frontend code — straight from the Atlas UI.</p></div>
+    <div class="card"><div class="card-accent" style="background:var(--teal)"></div>
+      <h3>⚡ Vector Search</h3><p>Atlas Vector Search lets you store embeddings and run semantic similarity search — great for AI features in your hackathon app.</p></div>
+  </div>
+
+  <div class="divider"></div>
+
+  <h3 class="sub">Essential mongosh Cheatsheet</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">mongosh cheatsheet</span><button class="copy-btn" onclick="cp(this)">copy</button></div>
+    <div class="code-body">
+<span class="cm">// Navigation</span>
+<span class="cg">show dbs</span>             <span class="cm">// list all databases</span>
+<span class="cg">use</span> <span class="co">hackdb</span>           <span class="cm">// switch / create database</span>
+<span class="cg">show collections</span>     <span class="cm">// list collections in current db</span>
+<span class="cg">db.col.drop()</span>        <span class="cm">// drop a collection</span>
+
+<span class="cm">// CRUD</span>
+<span class="ct">db.col</span><span class="cw">.insertOne({ key: </span><span class="cp">"val"</span><span class="cw"> })</span>
+<span class="ct">db.col</span><span class="cw">.insertMany([{}, {}, {}])</span>
+<span class="ct">db.col</span><span class="cw">.find({ key: </span><span class="cp">"val"</span><span class="cw"> }).pretty()</span>
+<span class="ct">db.col</span><span class="cw">.findOne({ _id: ObjectId(</span><span class="cp">"..."</span><span class="cw">) })</span>
+<span class="ct">db.col</span><span class="cw">.updateOne({ _id }, { $set: { key: </span><span class="cp">"new"</span><span class="cw"> } })</span>
+<span class="ct">db.col</span><span class="cw">.deleteOne({ key: </span><span class="cp">"val"</span><span class="cw"> })</span>
+<span class="ct">db.col</span><span class="cw">.countDocuments()</span>
+
+<span class="cm">// Indexes</span>
+<span class="ct">db.col</span><span class="cw">.createIndex({ field: </span><span class="co">1</span><span class="cw"> })          </span><span class="cm">// ascending</span>
+<span class="ct">db.col</span><span class="cw">.createIndex({ field: </span><span class="cp">"text"</span><span class="cw"> })     </span><span class="cm">// text search</span>
+<span class="ct">db.col</span><span class="cw">.getIndexes()</span>
+
+<span class="cm">// Aggregation</span>
+<span class="ct">db.col</span><span class="cw">.aggregate([</span>
+  <span class="cw">{ $match:  { status: </span><span class="cp">"active"</span><span class="cw"> } },</span>
+  <span class="cw">{ $group:  { _id: </span><span class="cp">"$region"</span><span class="cw">, total: { $sum: </span><span class="co">1</span><span class="cw"> } } },</span>
+  <span class="cw">{ $sort:   { total: </span><span class="co">-1</span><span class="cw"> } },</span>
+  <span class="cw">{ $limit:  </span><span class="co">5</span><span class="cw"> }</span>
+<span class="cw">])</span>
+    </div>
+  </div>
+
+  <div class="info-box warn">
+    <span class="icon">⚠️</span>
+    <p><strong>Security reminder:</strong> Store your <code>MONGODB_URI</code> and Atlas API keys in a <code>.env</code> file and add it to <code>.gitignore</code>. Credentials exposed in a public repo will be exploited within minutes by automated scanners.</p>
+  </div>
+
+  <div class="info-box tip">
+    <span class="icon">📦</span>
+    <p><strong>Sample datasets:</strong> Atlas has free built-in sample data (movies, AirBnB listings, stocks, etc.). In the Atlas UI, click your cluster → <em>Load Sample Dataset</em>. Instant realistic data for your demos.</p>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<script>
+function show(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+}
+function cp(btn) {
+  const text = btn.closest('.code-block').querySelector('.code-body').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'copied!';
+    btn.style.color = 'var(--green)';
+    btn.style.borderColor = 'var(--green)';
+    setTimeout(() => { btn.textContent = 'copy'; btn.style.color=''; btn.style.borderColor=''; }, 2000);
+  });
+}
+</script>
+</body>
+</html>
